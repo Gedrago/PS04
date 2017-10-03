@@ -1,6 +1,6 @@
 ---
 title: "STAT/MATH 495: Problem Set 04"
-author: "WRITE YOUR NAME HERE"
+author: "MERON GEDRAGO"
 date: "2017-10-03"
 output:
   html_document:
@@ -20,6 +20,7 @@ set.seed(76)
 
 Please indicate who you collaborated with on this assignment:
 
+Leonard Yoon 
 
 # Load packages, data, model formulas
 
@@ -47,6 +48,7 @@ model7_formula <- as.formula("Balance ~ Income + Limit + Rating + Age + Cards + 
 
 ```{r}
 set.seed(79)
+#sample 20 rows of the credit dataset to the training dataset, while the 380 rows are randomly picked from the credit dataset to the test dataset
 credit_train <- credit %>% 
   sample_n(20)
 credit_test <- credit %>% 
@@ -64,7 +66,51 @@ RMSE_test <- runif(n=7)
 
 
 # Do your work here:
+#create a function that inputs the modelformula and model number to give back the RMSE of each model 
+ModelRMSE <- function(formulainput, ModelNum) {
+  model_lm <- lm(formulainput, data=credit_train)
+model_lm %>% 
+  broom::tidy(conf.int=TRUE)
+predictions <- model_lm %>% 
+  broom :: augment(newdata=credit_train)
+ 
+MSE <- (((predictions$Balance - predictions$.fitted)^2)/20)
+MSE
+RMSE_train[ModelNum] <- sqrt(MSE)
+RMSE_train[ModelNum]
+}
+# find the RMSE_train, 
 
+RMSE_train[1] <-ModelRMSE(model1_formula,1) 
+RMSE_train[2] <- ModelRMSE(model2_formula,2)
+RMSE_train[3] <- ModelRMSE(model3_formula,3) 
+RMSE_train[4] <- ModelRMSE(model4_formula,4)  
+RMSE_train[5] <- ModelRMSE(model5_formula,5) 
+RMSE_train[6] <- ModelRMSE(model6_formula,6) 
+RMSE_train[7] <- ModelRMSE(model7_formula,7)
+
+
+#find the RMSE test for model 
+
+ModelRMSE <- function(formulainput, ModelNum) {
+  model_lm <- lm(formulainput, data=credit_train)
+model_lm %>% 
+  broom::tidy(conf.int=TRUE)
+predictions <- model_lm %>% 
+  broom :: augment(newdata=credit_test)
+ 
+MSE <- (((predictions$Balance - predictions$.fitted)^2)/380)
+MSE
+RMSE_test[ModelNum] <- sqrt(MSE)
+RMSE_test[ModelNum]
+}
+RMSE_test[1] <-ModelRMSE(model1_formula,1) 
+RMSE_test[2] <- ModelRMSE(model2_formula,2)
+RMSE_test[3] <- ModelRMSE(model3_formula,3) 
+RMSE_test[4] <- ModelRMSE(model4_formula,4)  
+RMSE_test[5] <- ModelRMSE(model5_formula,5) 
+RMSE_test[6] <- ModelRMSE(model6_formula,6) 
+RMSE_test[7] <- ModelRMSE(model7_formula,7)
 
 # Save results in a data frame. Note this data frame is in wide format.
 results <- data_frame(
@@ -72,7 +118,6 @@ results <- data_frame(
   RMSE_train,
   RMSE_test
 ) 
-
 # Some cleaning of results
 results <- results %>% 
   # More intuitive names:
@@ -84,6 +129,7 @@ results <- results %>%
   # can ggplot it
   gather(type, RMSE, -num_coefficients)
 
+
 ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
   geom_line() + 
   labs(x="# of coefficients", y="RMSE", col="Data used to evaluate \nperformance of fitted model")
@@ -94,14 +140,111 @@ ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
 
 Compare and contrast the two curves and hypothesize as to the root cause of any differences.
 
+From the above graph, the blue curve indicates the RMSE of the training dataset using the training dataset across the 7 models.While the red curve indicates the RMSE of the test data using the training set across the 7 models.We are using the credit training set to predict the balance of the same dataset, which can also be refereed to as 'Texas Sharpshooter Fallacy'.However since our training set is only 5% of the credit dataset, the training dataset isn't able to train models well enough to predict as accurate as possible.This leads for the blue line to spike  around coefficient number 2 and have RMSE 15. But since the test data is 95% of the dataset and we are taking the mean of the standard error, the error gets smaller when it is divided by the large number of rows in the test dataset. 
+So the root cause of the difference in the two curves is the proportion of the dataset that are assigned to be training dataset and test dataset. 
 
 
-# Bonus
+
+
+
+
+# Bonus 
 
 Repeat the whole process, but let `credit_train` be a random sample of size 380
 from `credit` instead of 20. Now compare and contrast this graph with the
 one above and hypothesize as to the root cause of any differences.
 
-```{r, echo=FALSE}
-
+```{r}
+set.seed(79)
+credit_train <- credit %>% 
+  sample_n(380)
+credit_test <- credit %>% 
+  anti_join(credit_train, by="ID")
 ```
+
+
+# RMSE vs number of coefficients
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+# Placeholder vectors of length 7. For now, I've filled them with arbitrary 
+# values; you will fill these in
+RMSE_train <- runif(n=7)
+RMSE_test <- runif(n=7)
+
+
+# Do your work here:
+#find the RMSE train  for model 
+ModelRMSE <- function(formulainput, ModelNum) {
+  model_lm <- lm(formulainput, data=credit_train)
+model_lm %>% 
+  broom::tidy(conf.int=TRUE)
+predictions <- model_lm %>% 
+  broom :: augment(newdata=credit_train)
+ 
+MSE <- (((predictions$Balance - predictions$.fitted)^2)/380)
+MSE
+RMSE_train[ModelNum] <- sqrt(MSE)
+RMSE_train[ModelNum]
+}
+
+RMSE_train[1] <-ModelRMSE(model1_formula,1) 
+RMSE_train[2] <- ModelRMSE(model2_formula,2)
+RMSE_train[3] <- ModelRMSE(model3_formula,3) 
+RMSE_train[4] <- ModelRMSE(model4_formula,4)  
+RMSE_train[5] <- ModelRMSE(model5_formula,5) 
+RMSE_train[6] <- ModelRMSE(model6_formula,6) 
+RMSE_train[7] <- ModelRMSE(model7_formula,7)
+
+#find the RMSE test for model 
+
+ModelRMSE <- function(formulainput, ModelNum) {
+  model_lm <- lm(formulainput, data=credit_train)
+model_lm %>% 
+  broom::tidy(conf.int=TRUE)
+predictions <- model_lm %>% 
+  broom :: augment(newdata=credit_test)
+ 
+MSE <- (((predictions$Balance - predictions$.fitted)^2)/20)
+MSE
+RMSE_test[ModelNum] <- sqrt(MSE)
+RMSE_test[ModelNum]
+}
+RMSE_test[1] <-ModelRMSE(model1_formula,1) 
+RMSE_test[2] <- ModelRMSE(model2_formula,2)
+RMSE_test[3] <- ModelRMSE(model3_formula,3) 
+RMSE_test[4] <- ModelRMSE(model4_formula,4)  
+RMSE_test[5] <- ModelRMSE(model5_formula,5) 
+RMSE_test[6] <- ModelRMSE(model6_formula,6) 
+RMSE_test[7] <- ModelRMSE(model7_formula,7)
+
+# Save results in a data frame. Note this data frame is in wide format.
+results <- data_frame(
+  num_coefficients = 1:7,
+  RMSE_train,
+  RMSE_test
+) 
+# Some cleaning of results
+results <- results %>% 
+  # More intuitive names:
+  rename(
+    `Training data` = RMSE_train,
+    `Test data` = RMSE_test
+  ) %>% 
+  # Convert results data frame to "tidy" data format i.e. long format, so that we
+  # can ggplot it
+  gather(type, RMSE, -num_coefficients)
+
+
+ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
+  geom_line() + 
+  labs(x="# of coefficients", y="RMSE", col="Data used to evaluate \nperformance of fitted model")
+```
+# Interpret the graph
+
+Compare and contrast the two curves and hypothesize as to the root cause of any differences.
+
+
+From the above graph, the blue curve indicates the RMSE of the training dataset using the training dataset across the 7 models.While the red curve indicates the RMSE of the test data using the training set across the 7 models.Contrary to the previous case where our training set was only 5%, the training set in this case is 95% of the credit dataset. In this graph, we see what we would expect from the 'Texas Sharpshooter Fallacy'. We see that  the training dataset able to train the models well enough to predict the balance of the training dataset very accurately and better than the test dataset.We can see a similar pattern of the blue line from the previous graph and red line from this graph on #1 and #2 coefficient which uses  0 or 1 predictor which wouldn't predict the balance well enough in either cases. 
+
+
+

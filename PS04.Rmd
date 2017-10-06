@@ -19,11 +19,11 @@ set.seed(76)
 # Collaboration
 
 Please indicate who you collaborated with on this assignment:
-Leonard Yoon 
+
 
 # Load packages, data, model formulas
 
-```{r, warning=FALSE}
+```{r, warning=FALSE,echo=FALSE}
 library(tidyverse)
 credit <- read_csv("http://www-bcf.usc.edu/~gareth/ISL/Credit.csv") %>%
   select(-X1) %>%
@@ -57,13 +57,11 @@ credit_test <- credit %>%
 
 # RMSE vs number of coefficients
 
-```{r, echo=TRUE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 # Placeholder vectors of length 7. For now, I've filled them with arbitrary 
 # values; you will fill these in
 RMSE_train <- runif(n=7)
 RMSE_test <- runif(n=7)
-
-
 # Do your work here:
 #create a function that inputs the modelformula and model number to give back the RMSE of each model 
 ModelRMSE <- function(formulainput, ModelNum) {
@@ -72,8 +70,7 @@ model_lm %>%
   broom::tidy(conf.int=TRUE)
 predictions <- model_lm %>% 
   broom :: augment(newdata=credit_train)
- 
-MSE <- (((predictions$Balance - predictions$.fitted)^2)/20)
+MSE <- mean((predictions$Balance - predictions$.fitted)^2)
 MSE
 RMSE_train[ModelNum] <- sqrt(MSE)
 RMSE_train[ModelNum]
@@ -98,8 +95,7 @@ model_lm %>%
 predictions <- model_lm %>% 
   broom :: augment(newdata=credit_test)
  
-MSE <- (((predictions$Balance - predictions$.fitted)^2)/380)
-MSE
+MSE <- mean((predictions$Balance - predictions$.fitted)^2)
 RMSE_test[ModelNum] <- sqrt(MSE)
 RMSE_test[ModelNum]
 }
@@ -139,8 +135,15 @@ ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
 
 Compare and contrast the two curves and hypothesize as to the root cause of any differences.
 
-From the above graph, the blue curve indicates the RMSE of the training dataset using the training dataset across the 7 models.While the red curve indicates the RMSE of the test data using the training set across the 7 models.We are using the credit training set to predict the balance of the same dataset, which can also be refereed to as 'Texas Sharpshooter Fallacy'.However since our training set is only 5% of the credit dataset, the training dataset isn't able to train models well enough to predict as accurate as possible.This leads for the blue line to spike  around coefficient number 2 and have RMSE 15. But since the test data is 95% of the dataset and we are taking the mean of the standard error, the error gets smaller when it is divided by the large number of rows in the test dataset. 
-So the root cause of the difference in the two curves is the proportion of the dataset that are assigned to be training dataset and test dataset. 
+From the above graph, the blue curve measures the predictive strength of the training set on itself using RMSE,  this can be referred to as 'Texas Sharpshooter Fallacy'. Since we are increasing the # of coefficient (i.e also the degrees of the freedom), we see that as the the number of coefficients increases , the RMSE keeps decreasing regardless of the fact that we are overfitting. This is exactly what we would expect because we predicting the same data we used to make the model. 
+
+
+Whereas, the red line depicts  a level of cross validation, it shows that the RMSE is relatively high at the two ends of x axis. The red line shows that that RMSE is high when the data is underfitted and also when it is overfitted. 
+
+
+So the key difference between the two lines is the dataset we use to measure our predictive strength.This results in the red line indicating the overfitting and underfitting of the data. 
+
+
 
 
 
@@ -164,7 +167,7 @@ credit_test <- credit %>%
 
 # RMSE vs number of coefficients
 
-```{r, echo=TRUE, warning=FALSE, message=FALSE}
+```{r,  echo=FALSE, warning=FALSE, message=FALSE}
 # Placeholder vectors of length 7. For now, I've filled them with arbitrary 
 # values; you will fill these in
 RMSE_train <- runif(n=7)
@@ -180,7 +183,7 @@ model_lm %>%
 predictions <- model_lm %>% 
   broom :: augment(newdata=credit_train)
  
-MSE <- (((predictions$Balance - predictions$.fitted)^2)/380)
+MSE <- mean((predictions$Balance - predictions$.fitted)^2)
 MSE
 RMSE_train[ModelNum] <- sqrt(MSE)
 RMSE_train[ModelNum]
@@ -203,7 +206,7 @@ model_lm %>%
 predictions <- model_lm %>% 
   broom :: augment(newdata=credit_test)
  
-MSE <- (((predictions$Balance - predictions$.fitted)^2)/20)
+MSE <- mean((predictions$Balance - predictions$.fitted)^2)
 MSE
 RMSE_test[ModelNum] <- sqrt(MSE)
 RMSE_test[ModelNum]
@@ -233,7 +236,6 @@ results <- results %>%
   # can ggplot it
   gather(type, RMSE, -num_coefficients)
 
-
 ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
   geom_line() + 
   labs(x="# of coefficients", y="RMSE", col="Data used to evaluate \nperformance of fitted model")
@@ -242,8 +244,8 @@ ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
 
 Compare and contrast the two curves and hypothesize as to the root cause of any differences.
 
+We see some similarities and differences between the above graph and the graph from part1. 
+The similarity is that we see a constantly decreasing pattern of the blue line, and we also see a dip of the red line. Major difference is that the red line doesn't have a more dramatic 'fall and rise' pattern as we had in the first graph.
 
-From the above graph, the blue curve indicates the RMSE of the training dataset using the training dataset across the 7 models.While the red curve indicates the RMSE of the test data using the training set across the 7 models.Contrary to the previous case where our training set was only 5%, the training set in this case is 95% of the credit dataset. In this graph, we see what we would expect from the 'Texas Sharpshooter Fallacy'. We see that  the training dataset able to train the models well enough to predict the balance of the training dataset very accurately and better than the test dataset.We can see a similar pattern of the blue line from the previous graph and red line from this graph on #1 and #2 coefficient which uses  0 or 1 predictor which wouldn't predict the balance well enough in either cases. 
-
-
+This difference is caused by the sampling in which our training set was only 5% of our data set while the rest was a test set.And due to the small number of training set, we weren't able to obtain a model that was able to capture enough information on the our dataset to make a prediction of the test data.The model doesn't even have enough information that we cant clearly much difference when the test set is being under or overfitted.  
 

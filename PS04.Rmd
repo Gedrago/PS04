@@ -43,7 +43,7 @@ model6_formula <- as.formula("Balance ~ Income + Limit + Rating + Age + Cards")
 model7_formula <- as.formula("Balance ~ Income + Limit + Rating + Age + Cards + Education")
 ```
 
-... where `credit_train` is defined below, along with `credit_test`.
+.. where `credit_train` is defined below, along with `credit_test`.
 
 ```{r}
 set.seed(79)

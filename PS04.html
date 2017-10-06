@@ -236,7 +236,7 @@ model4_formula &lt;- as.formula(&quot;Balance ~ Income + Limit + Rating&quot;)
 model5_formula &lt;- as.formula(&quot;Balance ~ Income + Limit + Rating + Age&quot;)
 model6_formula &lt;- as.formula(&quot;Balance ~ Income + Limit + Rating + Age + Cards&quot;)
 model7_formula &lt;- as.formula(&quot;Balance ~ Income + Limit + Rating + Age + Cards + Education&quot;)</code></pre>
-<p>… where <code>credit_train</code> is defined below, along with <code>credit_test</code>.</p>
+<p>.. where <code>credit_train</code> is defined below, along with <code>credit_test</code>.</p>
 <pre class="r"><code>set.seed(79)
 #sample 20 rows of the credit dataset to the training dataset, while the 380 rows are randomly picked from the credit dataset to the test dataset
 credit_train &lt;- credit %&gt;% 
